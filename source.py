@@ -4,7 +4,7 @@ import Image
 from graphs import *
 import binascii
 import random
-
+import base64
 
 
 class Source:
@@ -18,23 +18,47 @@ class Source:
             # Form the databits, from the filename 
             if self.fname is not None:
                 if self.fname.endswith('.png') or self.fname.endswith('.PNG'):
-                    # Its an image
+                   databits = bits_from_image(self, self.fname)
                 else:           
-                    # Assume it's text                    
+                    databits = text2bits(self, self.fname)  
+				  length = len(databits)               
             else:               
-                # Send monotone (the payload is all 1s for 
-                # monotone bits)   
+                databits = np.ones(1000)
+			   header = get_header(self, len(databits), '1')
+			   databits = binascii.a2b_qp(header) + databits
             return payload, databits
 
     def text2bits(self, filename):
-        # Given a text file, convert to bits
+		file = open(filename)
+		while 1:
+			line = file.readline()
+    			if not line:
+        			break
+    			else:
+				str = binascii.a2b_uu(line)
+				bits = binascii.a2b_qp(str)
+		length = len(bits)
+		header = get_header(self, length, '01')
+		bits = binascii.a2b_qp(header + str)
         return bits
 
     def bits_from_image(self, filename):
-        # Given an image, convert to bits
+		file = open(filename)
+		image = file
+		image_64 = base64.encodestring(open(image, "l").read())
+		str = binascii.a2b_base64(image_64)
+		bits = binascii.a2b_qp(str)
+		length = len(bits)
+		header = get_header(self, length, '01')
+		bits = binascii.a2b_qp(header + str)
         return bits
 
     def get_header(self, payload_length, srctype): 
-        # Given the payload length and the type of source 
-        # (image, text, monotone), form the header
+  		if self.fname is not None:
+                if self.fname.endswith('.png') or self.fname.endswith('.PNG'):
+                   header = srctype + "001" + str(payload_length)
+                else:           
+                    header = srctype + "000" + str(payload_length)   
+		else:
+			header = srctype + "111" + str(payload_length)   
         return header
