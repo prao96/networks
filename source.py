@@ -15,7 +15,6 @@ class Source:
         print 'Source: '
 
     def process(self):
-<<<<<<< HEAD
             # Form the databits, from the filename 
             if self.fname is not None:
                 if self.fname.endswith('.png') or self.fname.endswith('.PNG'):
@@ -47,7 +46,6 @@ class Source:
 
     def text2bits(self, filename):
         file = open(filename)
-        import pdb; pdb.set_trace()
         while 1:
 			line = file.readline()
     			if not line:
