@@ -6,6 +6,7 @@ import binascii
 import random
 import base64
 import pdb
+import numpy
 
 
 class Source:
@@ -15,54 +16,29 @@ class Source:
 		self.fname = filename
 		print 'Source: '
 
-	def process(self):
-		# Form the databits, from the filename 
-		#pdb.set_trace()
-		if self.fname is not None:
-			if self.fname.endswith('.png') or self.fname.endswith('.PNG'):
-				databits = bits_from_image(self, self.fname)
-			else:
-				databits = text2bits(self, self.fname)  
-				length = len(databits)               
-		else:
-			databits = np.ones(1000)
-			header = get_header(self, len(databits), '1')
-			databits = binascii.a2b_qp(header) + databits
-		return payload, databits
-
 	def text2bits(self, filename):
 		file = open(filename)
-		while 1:
-			# Form the databits, from the filename 
-			if self.fname is not None:
-				if self.fname.endswith('.png') or self.fname.endswith('.PNG'):
-					databits = bits_from_image(self, self.fname)
-				else:
-					databits = text2bits(self, self.fname)  
-					length = len(databits)               
-			else:
-				databits = np.ones(1000)
-				header = get_header(self, len(databits), '1')
-				databits = binascii.a2b_qp(header) + databits
-		return payload, databits
-
-	def text2bits(self, filename):
-		file = open(filename)
+		values = []
+		binvals = []
 		while 1:
 			line = file.readline()
 			if not line:
 				break
 			else:
-				str = binascii.a2b_uu(line)
-				bits = binascii.a2b_qp(str)
-				length = len(bits)
-				header = get_header(self, length, '01')
-				bits = binascii.a2b_qp(header + str)
-				str = binascii.a2b_uu(line)
-				bits = binascii.a2b_qp(str)
-				length = len(bits)
-				header = get_header(self, length, '01')
-				bits = binascii.a2b_qp(header + str)
+				#str is an ascii string of characters
+				newValues = [ord(c) for c in line]
+				i=0
+				for v in newValues:
+					newValues[i]=[int(x) for x in list('{0:0b}'.format(8))]
+					i+=1
+				values+=newValues
+		i=0
+		for k in values:
+			binvals.append(list(k))
+			i +=1
+		bits = numpy.array(binvals)
+		bits = numpy.ravel(bits)
+		print bits
 		return bits
 
 	def bits_from_image(self, filename):
@@ -85,3 +61,24 @@ class Source:
 		else:
 			header = srctype + "111" + str(payload_length)    
 		return header
+
+	def process(self):
+		# Form the databits, from the filename 
+		#pdb.set_trace()
+		if self.fname is not None:
+			databits= numpy.array([])
+			if self.fname.endswith('.png') or self.fname.endswith('.PNG'):
+				#databits is (or should be) a numpy array
+				databits = self.bits_from_image(self, self.fname)
+				length = len(databits)
+			else:
+				databits = self.text2bits(self.fname)  
+				length = len(databits)
+		else:
+			databits = numpy.ones(1000)
+			length = len(databits)
+			#header should return a numpy array
+		header = self.get_header(self, length, '1')
+		payload = databits
+		databits = numpy.concatentate(header,databits)
+		return payload, databits
