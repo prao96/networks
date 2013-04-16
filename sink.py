@@ -15,14 +15,18 @@ class Sink:
     def process(self, recd_bits):
         source, size = self.read_header(recd_bits)
         #truncate recd_bits to get rid of header
+        rcd_payload = recd_bits[20:]
         #sed rcd_payload to the truncated array
-        if source == '000'
-            #bits to text
-        elif source = '001'
-            #img to bits
-        elif source = '111'
-            #monotone
-        
+        if source == '000':
+            msg = self.bits2text(rcd_payload)
+        elif source == '001':
+            self.image_from_bits(rcd_payload, "rcdImage.png")
+            msg = 'Image received'
+        elif source == '111':
+            msg = 'monotone'
+        else:
+            msg = 'unrecognizeed sourcetype: '+source
+        print msg
 
 
         # Process the recd_bits to form the original transmitted
@@ -65,11 +69,11 @@ class Sink:
         # Given the header bits, compute the payload length
         # and source type (compatible with get_header on source)
         print header_bits
-        header=numpy.zeros(20)
+        header=numpy.zeros(20, dtype=numpy.int)
         payload_length = ""
         i = 0
         while i<20:
-            header[i] = int(header_bits[i])
+            header[i] = numpy.trunc(header_bits[i])
             i+=1
         print header
         srctype = str(header[1]) + str(header[2]) + str(header[3])
