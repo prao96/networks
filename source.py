@@ -59,13 +59,19 @@ class Source:
 		return bits
 
 	def get_header(self, payload_length, srctype): 
+		headerArray = []
+		#print payload_length
+		size = bin(payload_length)[2:].zfill(16)
 		if self.fname is not None:
-				if self.fname.endswith('.png') or self.fname.endswith('.PNG'):
-					header = srctype + "001" + str(payload_length)
-				else:
-					header = srctype + "000" + str(payload_length)   
+			if self.fname.endswith('.png') or self.fname.endswith('.PNG'):
+				headerString = srctype + "001" + str(size)
+			else:
+				headerString = srctype + "000" + str(size)   
 		else:
-			header = srctype + "111" + str(payload_length)    
+			headerString = srctype + "111" + str(size)
+		headerArray = [int(s) for s in headerString]
+		header = numpy.array(headerArray)
+		print header
 		return header
 
 	def process(self):
@@ -80,11 +86,13 @@ class Source:
 			else:
 				databits = self.text2bits(self.fname)  
 				length = len(databits)
+			header = self.get_header(length, '1')
 		else:
 			databits = numpy.ones(1000)
 			length = len(databits)
 			#header should return a numpy array
-		header = self.get_header(self, length, '1')
+			header = self.get_header(length, '0')
 		payload = databits
-		databits = numpy.concatentate(header,databits)
+		databits = numpy.concatenate([header,databits])
+		print databits
 		return payload, databits
