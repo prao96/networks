@@ -15,6 +15,7 @@ class Source:
         print 'Source: '
 
     def process(self):
+<<<<<<< HEAD
             # Form the databits, from the filename 
             if self.fname is not None:
                 if self.fname.endswith('.png') or self.fname.endswith('.PNG'):
@@ -31,6 +32,23 @@ class Source:
     def text2bits(self, filename):
 		file = open(filename)
 		while 1:
+        # Form the databits, from the filename 
+        if self.fname is not None:
+            if self.fname.endswith('.png') or self.fname.endswith('.PNG'):
+                databits = bits_from_image(self, self.fname)
+            else:           
+                databits = text2bits(self, self.fname)  
+                length = len(databits)               
+        else:               
+            databits = np.ones(1000)
+            header = get_header(self, len(databits), '1')
+            databits = binascii.a2b_qp(header) + databits
+        return payload, databits
+
+    def text2bits(self, filename):
+        file = open(filename)
+        import pdb; pdb.set_trace()
+        while 1:
 			line = file.readline()
     			if not line:
         			break
@@ -40,6 +58,11 @@ class Source:
 		            length = len(bits)
 		            header = get_header(self, length, '01')
 		            bits = binascii.a2b_qp(header + str)
+				str = binascii.a2b_uu(line)
+				bits = binascii.a2b_qp(str)
+		length = len(bits)
+		header = get_header(self, length, '01')
+		bits = binascii.a2b_qp(header + str)
         return bits
 
     def bits_from_image(self, filename):
@@ -60,5 +83,5 @@ class Source:
                 else:           
                     header = srctype + "000" + str(payload_length)   
 		else:
-			header = srctype + "111" + str(payload_length)   
+			header = srctype + "111" + str(payload_length)    
         return header
