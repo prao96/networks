@@ -19,13 +19,12 @@ class Source:
 	def text2bits(self, filename):
 		file = open(filename)
 		values = []
-		binvals = []
+		binVals = []
 		while 1:
 			line = file.readline()
 			if not line:
 				break
 			else:
-				#str is an ascii string of characters
 				newValues = [ord(c) for c in line]
 				i=0
 				for v in newValues:
@@ -34,22 +33,29 @@ class Source:
 				values+=newValues
 		i=0
 		for k in values:
-			binvals.append(list(k))
+			binVals.append(list(k))
 			i +=1
-		bits = numpy.array(binvals)
+		bits = numpy.array(binVals)
 		bits = numpy.ravel(bits)
-		print bits
+		#print bits
 		return bits
 
 	def bits_from_image(self, filename):
-		file = open(filename)
-		image = file
-		image_64 = base64.encodestring(open(image, "l").read())
-		str = binascii.a2b_base64(image_64)
-		bits = binascii.a2b_qp(str)
-		length = len(bits)
-		header = get_header(self, length, '01')
-		bits = binascii.a2b_qp(header + str)
+		binPix = []
+		binVals = []
+		bitsCopy = [] 
+		im = Image.open(filename)
+		pixelValues = list(im.getdata())
+		flatPix = [val for subPV in pixelValues for val in subPV]
+		for v in flatPix:
+			binPix.append(bin(v)[2:].zfill(8))
+		for k in binPix:
+			binVals.append(list(k))
+		flatVals = [val for sub in binVals for val in sub]
+		bitsCopy=[int(s) for s in flatVals]
+		bits = numpy.array(bitsCopy)
+		#print bitsCopy
+		#print bits
 		return bits
 
 	def get_header(self, payload_length, srctype): 
@@ -69,7 +75,7 @@ class Source:
 			databits= numpy.array([])
 			if self.fname.endswith('.png') or self.fname.endswith('.PNG'):
 				#databits is (or should be) a numpy array
-				databits = self.bits_from_image(self, self.fname)
+				databits = self.bits_from_image(self.fname)
 				length = len(databits)
 			else:
 				databits = self.text2bits(self.fname)  
