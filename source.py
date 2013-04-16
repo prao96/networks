@@ -47,20 +47,20 @@ class Source:
     def text2bits(self, filename):
         file = open(filename)
         while 1:
-			line = file.readline()
-    			if not line:
-        			break
-    			else:
-				    str = binascii.a2b_uu(line)
-				    bits = binascii.a2b_qp(str)
-		            length = len(bits)
-		            header = get_header(self, length, '01')
-		            bits = binascii.a2b_qp(header + str)
+            line = file.readline()
+            if not line:
+        		break
+    		else:
+			    str = binascii.a2b_uu(line)
+			    bits = binascii.a2b_qp(str)
+		        length = len(bits)
+		        header = get_header(self, length, '01')
+		        bits = binascii.a2b_qp(header + str)
 				str = binascii.a2b_uu(line)
 				bits = binascii.a2b_qp(str)
-		length = len(bits)
-		header = get_header(self, length, '01')
-		bits = binascii.a2b_qp(header + str)
+		        length = len(bits)
+		        header = get_header(self, length, '01')
+		        bits = binascii.a2b_qp(header + str)
         return bits
 
     def bits_from_image(self, filename):
