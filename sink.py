@@ -16,6 +16,7 @@ class Sink:
         source, size = self.read_header(recd_bits)
         #truncate recd_bits to get rid of header
         rcd_payload = recd_bits[20:]
+        print rcd_payload
         #sed rcd_payload to the truncated array
         if source == '000':
             msg = self.bits2text(rcd_payload)
@@ -49,9 +50,23 @@ class Sink:
         # Convert the received payload to text (string)
 
         #every eight is a byte, group into array of length 8 arrays
+        numBytes = numpy.trunc(bits.size/8)
+        byteArray=numpy.reshape(bits, (-1,8))
+        #print bytearray
         #convert each byte-array into an ascii char
+        
+        valArray = array(byteArray.shape[0])
+        i = 0
+        while i<byteArray.shape[0]:
+            for b in byteArray[i,:]:
+                valArray(i).append(str(b))
+            i+=1
+        print valArray
+
+
         #push chars together to make string
         #save txt file
+        text = "hi"
         return  text
 
     def image_from_bits(self, bits,filename):
