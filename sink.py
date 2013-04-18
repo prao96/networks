@@ -51,9 +51,9 @@ class Sink:
         # Convert the received payload to text (string)
 
         #every eight is a byte, group into array of length 8 arrays
-        byteArray=numpy.reshape(bits, (-1,4))
+        byteArray=numpy.reshape(bits, (-1,8))
         #convert each byte-array into an ascii char
-        valArray = [None]*(len(bits)/4)
+        valArray = [None]*(len(bits)/8)
         i = 0
         strVal = ""
 
@@ -67,7 +67,7 @@ class Sink:
 
         #print valArray
 
-        charArray = [None]*(len(bits)/4)
+        charArray = [None]*(len(bits)/8)
         i = 0
         for vA in valArray:
             intVal = int(vA, 2)

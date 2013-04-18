@@ -17,27 +17,30 @@ class Source:
 		print 'Source: '
 
 	def text2bits(self, filename):
-		file = open(filename)
-		values = []
+
+		f = open(filename, "r")
 		binVals = []
-		while 1:
-			line = file.readline()
+		while 1: 
+			line = f.readline()
 			if not line:
 				break
 			else:
 				newValues = [ord(c) for c in line]
-				i=0
-				for v in newValues:
-					newValues[i]=[int(x) for x in list('{0:0b}'.format(8))]
-					i+=1
-				values+=newValues
-		i=0
-		for k in values:
-			binVals.append(list(k))
-			i +=1
-		bits = numpy.array(binVals)
-		bits = numpy.ravel(bits)
-		#print bits
+			i = 0
+			for v in newValues:
+				intV = int(v)
+				newValues[i] = bin(intV)[2:].zfill(8)
+				i+=1
+
+		endArray = []
+		for v in newValues:
+			for c in v:
+				endArray.append(int(c))
+
+		bits = numpy.array(endArray)
+		print bits
+
+	
 		return bits
 
 	def bits_from_image(self, filename):
