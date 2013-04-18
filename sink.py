@@ -26,7 +26,7 @@ class Sink:
         elif source == '111':
             msg = 'monotone'
         else:
-            msg = 'unrecognizeed sourcetype: '+source
+            msg = 'unrecognizeed sourcetype: ' + source
         print msg
 
 
@@ -63,21 +63,45 @@ class Sink:
             i+=1
         print valArray
 
+        text = ""
 
-        #push chars together to make string
-        #save txt file
-        text = "hi"
+        for c in valArray: 
+            text += c
+
         return  text
 
     def image_from_bits(self, bits,filename):
-        # Convert the received payload to an image and save it
-        # No return value required .
+       
+        # make every eight bits into a byte
+        numBytes = numpy.trunc(bits.size/8)
+        # group bytes into one array of multiple arrays of length 8
+        byteArray = numpy.reshape(bits, (-1,8))
+        asciiVals = numpy.array([])
+        # for
+        for b in byteArray: 
+            byteString = ""
+            for bit in b: 
+                byteString+=str(bit)
+            asciiVals.append(int(byteString,2))
+        # group ascii values into one array of multiple arrays of length 2 (array of pairs)
+        pairs = numpy.reshape(asciiVals, (-1, 2))
+        # 2-tuples? 
+        # convert pairs into pixel vals
+        i = 0
+        for every p in pairs:
+            im.getpixel((p[0],p[1]))
+            i+=1
 
-        #every eight is a one
-        #ones into pairs
-        #convert to decimal
-        #pairs into pixels
-        #use Image class to save image
+        im = Image.new('L', i) # create the image
+        draw = ImageDraw.Draw(im)
+        # We need an HttpResponse object with the correct mimetype
+        response = HttpResponse(mimetype="image/png")
+        # now, we tell the image to save as a PNG to the 
+        # provided file-like object
+        im.save(response, 'PNG')
+        # use Image class to save image
+
+        # not returning any val
         pass 
 
     def read_header(self, header_bits): 
@@ -98,6 +122,7 @@ class Sink:
         while i<20:
             payload_length+=str(header[i])
             i+=1
+        print payload_length
 
 
         print '\tRecd header: ', header
