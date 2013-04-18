@@ -15,8 +15,9 @@ class Sink:
     def process(self, recd_bits):
         source, size = self.read_header(recd_bits)
         #truncate recd_bits to get rid of header
+        rcd_payload = numpy.array([])
         rcd_payload = recd_bits[20:]
-        print rcd_payload
+        rcd_payload= rcd_payload[:int(size,2)]
         #sed rcd_payload to the truncated array
         if source == '000':
             msg = self.bits2text(rcd_payload)
@@ -50,23 +51,48 @@ class Sink:
         # Convert the received payload to text (string)
 
         #every eight is a byte, group into array of length 8 arrays
-        numBytes = numpy.trunc(bits.size/8)
-        byteArray=numpy.reshape(bits, (-1,8))
-        #print bytearray
+        byteArray=numpy.reshape(bits, (-1,4))
         #convert each byte-array into an ascii char
-        
-        valArray = array(byteArray.shape[0])
+        valArray = [None]*(len(bits)/4)
         i = 0
-        while i<byteArray.shape[0]:
-            for b in byteArray[i,:]:
-                valArray(i).append(str(b))
+        strVal = ""
+
+        for bA in byteArray:
+            for val in bA:
+                strVal = strVal + str(val)
+                #print strVal
+            valArray[i] = strVal
+            i += 1
+            strVal = ""
+
+        #print valArray
+
+        charArray = [None]*(len(bits)/4)
+        i = 0
+        for vA in valArray:
+            intVal = int(vA, 2)
+            charVal = chr(intVal)
+            charArray[i]=charVal
             i+=1
-        print valArray
 
-        text = ""
+        text=""
+        for ch in charArray:
+            text+=ch
+        print text
 
-        for c in valArray: 
-            text += c
+        myfile = open('test.txt','w')
+        myfile.write(text)
+        myfile.close()
+        # while i<byteArray.shape[0]:
+        #     for b in byteArray[i,:]:
+        #         numpy.append(valArray, valArray[])
+        #     i+=1
+        # print valArray
+
+        # #text = ""
+
+        # #for c in valArray: 
+        #     #text += c
 
         return  text
 
@@ -88,7 +114,7 @@ class Sink:
         # 2-tuples? 
         # convert pairs into pixel vals
         i = 0
-        for every p in pairs:
+        for p in pairs:
             im.getpixel((p[0],p[1]))
             i+=1
 
