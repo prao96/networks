@@ -1,10 +1,12 @@
 # audiocom library: Source and sink functions
 import common_srcsink
 import Image
+import ImageDraw
 from graphs import *
 import binascii
 import random
 import numpy
+from scipy.misc import toimage
 
 
 class Sink:
@@ -48,11 +50,7 @@ class Sink:
         return rcd_payload
 
     def bits2text(self, bits):
-        # Convert the received payload to text (string)
-
-        #every eight is a byte, group into array of length 8 arrays
         byteArray=numpy.reshape(bits, (-1,8))
-        #convert each byte-array into an ascii char
         valArray = [None]*(len(bits)/8)
         i = 0
         strVal = ""
@@ -65,7 +63,6 @@ class Sink:
             i += 1
             strVal = ""
 
-        #print valArray
 
         charArray = [None]*(len(bits)/8)
         i = 0
@@ -83,51 +80,42 @@ class Sink:
         myfile = open('test.txt','w')
         myfile.write(text)
         myfile.close()
-        # while i<byteArray.shape[0]:
-        #     for b in byteArray[i,:]:
-        #         numpy.append(valArray, valArray[])
-        #     i+=1
-        # print valArray
-
-        # #text = ""
-
-        # #for c in valArray: 
-        #     #text += c
-
+        
         return  text
 
-    def image_from_bits(self, bits,filename):
+    def image_from_bits(self, bits, filename):
        
         # make every eight bits into a byte
-        numBytes = numpy.trunc(bits.size/8)
+        bits = bits[32:]
+        byteArray=numpy.reshape(bits, (-1,8))
         # group bytes into one array of multiple arrays of length 8
-        byteArray = numpy.reshape(bits, (-1,8))
-        asciiVals = numpy.array([])
-        # for
-        for b in byteArray: 
-            byteString = ""
-            for bit in b: 
-                byteString+=str(bit)
-            asciiVals.append(int(byteString,2))
-        # group ascii values into one array of multiple arrays of length 2 (array of pairs)
-        pairs = numpy.reshape(asciiVals, (-1, 2))
-        # 2-tuples? 
-        # convert pairs into pixel vals
-        i = 0
-        for p in pairs:
-            im.getpixel((p[0],p[1]))
-            i+=1
 
-        im = Image.new('L', i) # create the image
-        draw = ImageDraw.Draw(im)
-        # We need an HttpResponse object with the correct mimetype
-        response = HttpResponse(mimetype="image/png")
-        # now, we tell the image to save as a PNG to the 
-        # provided file-like object
-        im.save(response, 'PNG')
-        # use Image class to save image
+        print byteArray
+        stringBins = []
+        decimals = []
+        pixelPairs = []
 
-        # not returning any val
+        for bA in byteArray:
+            string = ""
+            for k in bA:
+                string += str(k)
+            stringBins.append(string)
+
+        for v in stringBins:
+            decimals.append(int(v, 2))
+
+
+
+        pixelPairs = numpy.reshape(numpy.array(decimals), (-1, 2))
+
+        numpyPairs = numpy.array(pixelPairs)
+
+        numpyPairs = numpy.array(tupPairs)
+        im = Image.fromarray(numpyPairs)
+        im.save('new.PNG')
+        im.show()
+
+       
         pass 
 
     def read_header(self, header_bits): 

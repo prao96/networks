@@ -45,20 +45,15 @@ class Source:
 
 	def bits_from_image(self, filename):
 		binPix = []
-		binVals = []
 		bitsCopy = [] 
 		im = Image.open(filename)
 		pixelValues = list(im.getdata())
 		flatPix = [val for subPV in pixelValues for val in subPV]
 		for v in flatPix:
 			binPix.append(bin(v)[2:].zfill(8))
-		for k in binPix:
-			binVals.append(list(k))
-		flatVals = [val for sub in binVals for val in sub]
+		flatVals = [val for sub in binPix for val in sub]
 		bitsCopy=[int(s) for s in flatVals]
 		bits = numpy.array(bitsCopy)
-		#print bitsCopy
-		#print bits
 		return bits
 
 	def get_header(self, payload_length, srctype): 
