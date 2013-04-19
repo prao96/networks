@@ -38,8 +38,6 @@ class Source:
 				endArray.append(int(c))
 
 		bits = numpy.array(endArray)
-		print bits
-
 	
 		return bits
 
@@ -47,18 +45,30 @@ class Source:
 		binPix = []
 		bitsCopy = [] 
 		im = Image.open(filename)
+		im = im.convert("L")
+
 		pixelValues = list(im.getdata())
-		flatPix = [val for subPV in pixelValues for val in subPV]
-		for v in flatPix:
+		# pixelValues has tuples inside an array
+		#flatPix = [val for subPV in pixelValues for val in subPV]
+		#print flatPix
+		# flatPix has pixel ints in a simple array
+
+
+		for v in pixelValues:
 			binPix.append(bin(v)[2:].zfill(8))
+		# binPix has binary string representations of the pixel vals
+
 		flatVals = [val for sub in binPix for val in sub]
+		# flatVals has an array of either 1 or a 0 as a string
+
 		bitsCopy=[int(s) for s in flatVals]
+		# bitsCopy has an array of 0s and 1s
+
 		bits = numpy.array(bitsCopy)
 		return bits
 
 	def get_header(self, payload_length, srctype): 
 		headerArray = []
-		#print payload_length
 		size = bin(payload_length)[2:].zfill(16)
 		if self.fname is not None:
 			if self.fname.endswith('.png') or self.fname.endswith('.PNG'):
@@ -69,7 +79,6 @@ class Source:
 			headerString = srctype + "111" + str(size)
 		headerArray = [int(s) for s in headerString]
 		header = numpy.array(headerArray)
-		print header
 		return header
 
 	def process(self):
@@ -92,5 +101,4 @@ class Source:
 			header = self.get_header(length, '0')
 		payload = databits
 		databits = numpy.concatenate([header,databits])
-		print databits
 		return payload, databits

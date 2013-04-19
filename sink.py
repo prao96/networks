@@ -81,19 +81,18 @@ class Sink:
         myfile.write(text)
         myfile.close()
         
-        return  text
+        return text
 
     def image_from_bits(self, bits, filename):
        
         # make every eight bits into a byte
-        bits = bits[32:]
+        #bits = bits[]
         byteArray=numpy.reshape(bits, (-1,8))
         # group bytes into one array of multiple arrays of length 8
-
-        print byteArray
         stringBins = []
         decimals = []
         pixelPairs = []
+
 
         for bA in byteArray:
             string = ""
@@ -105,14 +104,14 @@ class Sink:
             decimals.append(int(v, 2))
 
 
+        #pixelPairs = numpy.reshape(numpy.array(decimals), (-1, 2))
 
-        pixelPairs = numpy.reshape(numpy.array(decimals), (-1, 2))
-
-        numpyPairs = numpy.array(pixelPairs)
-
-        numpyPairs = numpy.array(tupPairs)
-        im = Image.fromarray(numpyPairs)
-        im.save('new.PNG')
+        numpyDec = numpy.array(decimals)
+        dimension = 32
+        #im = Image.fromarray(numpyPairs)
+        im = Image.new("L", (dimension, dimension))
+        im.putdata(numpyDec)
+        im.save(filename)
         im.show()
 
        
