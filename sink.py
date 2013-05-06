@@ -92,7 +92,13 @@ class Sink:
         # Creates header from first 20 bits
         header = header_bits[:20]
         # Decodes srctype
-        srctype = str(header[1]) + str(header[2]) + str(header[3])
+        srcString = str(header[1]) + str(header[2]) + str(header[3])
+        if srcString == '000':
+            srctype='Text'
+        elif srcString == '001':
+            srctype = 'Image (.png)'
+        elif srcString == '111':
+            srctype = 'Monotone'
         # Decodes payload_length
         i=4
         while i<20:

@@ -25,7 +25,7 @@ class Source:
 			header = self.get_header(length, '1')
 		else:
 			# Creates an array of bits for sending monotone
-			databits = numpy.ones(1000)
+			databits = numpy.ones(self.monotone)
 			length = len(databits) 
 			header = self.get_header(length, '0')
 		# payload now has data bits of file
