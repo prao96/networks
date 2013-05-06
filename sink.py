@@ -94,7 +94,7 @@ class Sink:
         # Decodes srctype
         srcString = str(header[1]) + str(header[2]) + str(header[3])
         if srcString == '000':
-            srctype='Text'
+            srctype='Text (.txt)'
         elif srcString == '001':
             srctype = 'Image (.png)'
         elif srcString == '111':
