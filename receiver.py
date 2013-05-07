@@ -37,9 +37,29 @@ class Receiver:
         First, find the first sample index where you detect energy based on the
         moving average method described in the milestone 2 description.
         '''
-        # Fill in your implementation of the high-energy check procedure
+        # Fill in your implementation of the high-energy
+        center=self.spb/2
+        bound=round(self.spb/4,0)
+        k=0
+        sum=0
+        avg=0
+        energy_offset=0
+        while k<len(demod_samples)-self.spb:
+            for x in range(int(center-bound),int(center+bound)):
+                sum+=demod_samples[x]
+            avg=sum/(self.spb/2)
+            if avg>(one+thresh)/2:
+                energy_offset=int(k+center)
+                break
+            else:
+                k+=1
+            sum=0
+            avg=0
 
-        energy_offset = # fill in the result of the high-energy check
+
+        if k==len(demod_samples)-self.spb-1:
+            energy_offset=-1
+
         if energy_offset < 0:
             print '*** ERROR: Could not detect any ones (so no preamble). ***'
             print '\tIncrease volume / turn on mic?'
@@ -52,8 +72,33 @@ class Receiver:
         samples is the highest. 
         '''
         # Fill in your implementation of the cross-correlation check procedure
+        preamble = numpy.array([1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1])
+        samples = numpy.zeros(len(preamble)*self.spb)
+        counter = 0
+        k=0
+        for i in preamble:
+            if i == 0:
+                valToFill = 0
+            elif i == 1:
+                valToFill = 9
+            while counter<self.spb:
+                samples[k] = valToFill
+                k+=1
+                counter+=1
+            counter = 0
+
+        numSamples = len(samples)
+        demodSubset = numpy.zeros(numSamples)
+        dotProducts=numpy.zeros(3*len(samples))
+        index=0
+        for i in range(energy_offset,energy_offset+3*len(samples)):
+            demodSubset=demod_samples[i:i+numSamples].copy()
+            dotProducts[index]=numpy.dot(samples,demodSubset)
+            index+=1
+
+
         
-        preamble_offset = # fill in the result of the cross-correlation check 
+        preamble_offset = numpy.argmax(dotProducts) 
         
         '''
         [preamble_offset] is the additional amount of offset starting from [offset],
