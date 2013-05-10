@@ -122,6 +122,18 @@ class Receiver:
         '''
 
         # Fill in your implementation
+        preamble = numpy.array([1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1])
+        preambleCheckSamples = numpy.zeros(24)
+        preambleCheck = numpy.zeros(24)
+        i = 0
+        while i<24:
+            preambleCheckSamples[i]=demod_samples[preamble_start+i*self.spb]
+        i=0
+        while i<24:
+            
+
+
+
 
         return data_bits # without preamble
 
