@@ -38,26 +38,20 @@ class Receiver:
         moving average method described in the milestone 2 description.
         '''
         # Fill in your implementation of the high-energy
-        print thresh
-        print (one+thresh)/2
         center=self.spb/2
-        print center
         bound=round(self.spb/4,0)
-        print bound
         k=0
         sum=0
         avg=0
         energy_offset=0
         flag = 0
-        print demod_samples
         while k<len(demod_samples)-self.spb:
-            for x in range(int(center-bound),int(center+bound)):
+            for x in range(int(center-bound+k),int(center+bound+k)):
                 sum+=demod_samples[x]
             avg=sum/(2*bound)
-            if avg>.7:
+            if avg>(thresh+one)/2:
                 energy_offset=k+center
                 flag = 1
-                print "flag!!!!!!!"
             else:
                 k+=1
             if flag==1:
@@ -108,9 +102,9 @@ class Receiver:
             dotProducts[index]=numpy.dot(samples,demodSubset)
             index+=1
 
-
-        
+        print dotProducts 
         preamble_offset = numpy.argmax(dotProducts) 
+        print preamble_offset
         
         '''
         [preamble_offset] is the additional amount of offset starting from [offset],
