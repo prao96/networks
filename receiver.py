@@ -38,26 +38,35 @@ class Receiver:
         moving average method described in the milestone 2 description.
         '''
         # Fill in your implementation of the high-energy
+        print thresh
+        print (one+thresh)/2
         center=self.spb/2
+        print center
         bound=round(self.spb/4,0)
+        print bound
         k=0
         sum=0
         avg=0
         energy_offset=0
+        flag = 0
+        print demod_samples
         while k<len(demod_samples)-self.spb:
             for x in range(int(center-bound),int(center+bound)):
                 sum+=demod_samples[x]
-            avg=sum/(self.spb/2)
-            if avg>(one+thresh)/2:
-                energy_offset=int(k+center)
-                break
+            avg=sum/(2*bound)
+            if avg>.7:
+                energy_offset=k+center
+                flag = 1
+                print "flag!!!!!!!"
             else:
                 k+=1
+            if flag==1:
+                break
             sum=0
             avg=0
 
 
-        if k==len(demod_samples)-self.spb-1:
+        if k==len(demod_samples)-self.spb:
             energy_offset=-1
 
         if energy_offset < 0:
@@ -65,6 +74,9 @@ class Receiver:
             print '\tIncrease volume / turn on mic?'
             print '\tOr is there some other synchronization bug? ***'
             sys.exit(1)
+
+        print "Energy offset: "
+        print energy_offset
 
         '''
         Then, starting from the demod_samples[offset], find the sample index where
@@ -128,10 +140,8 @@ class Receiver:
         i = 0
         while i<24:
             preambleCheckSamples[i]=demod_samples[preamble_start+i*self.spb]
-        i=0
-        while i<24:
-            
-
+            i+=1
+        print preambleCheckSamples
 
 
 
