@@ -90,6 +90,7 @@ class Receiver:
                 k+=1
                 counter+=1
             counter = 0
+
         # Find dot-products 
         numSamples = len(samples)
         demodSubset = numpy.zeros(numSamples)
@@ -132,12 +133,12 @@ class Receiver:
             i+=1
         index = 0
         numPreambleZeros = 9
-        preambleZeros=numpy.zeros(numPreambleZeros)
         zerosIndex=0
-        preambleOnes=numpy.zeros(15)
         onesIndex=0
         i=0
-        # Find newThresh 
+        preambleZeros=numpy.zeros(numPreambleZeros)
+        preambleOnes=numpy.zeros(15)
+        # Find new [thresh], [one], [zero]
         while i<preamble_length:
             if preamble[index]==0:
                 preambleZeros[zerosIndex]=preambleCheckSamples[i]
@@ -151,6 +152,7 @@ class Receiver:
         onesAverage = numpy.average(preambleOnes)
         newThresh = (zerosAverage+onesAverage)/2
 
+        # Demap into bits
         preambleCheckBits = numpy.zeros(preamble_length)
         i=0
         while i<preamble_length:
@@ -160,14 +162,15 @@ class Receiver:
                 preambleCheckBits[i]=1
             i+=1
 
+        # Error-checking
         if preambleCheckBits.all()!=preamble.all():
             print '*** ERROR: Preamble decoded incorrectly. ***'
             print preambleCheckBits
             print preamble
             sys.exit(1)
 
+        # Find data_bits
         data_bits = numpy.zeros(int((len(demod_samples)-preamble_start-preamble_length)/self.spb),int)
-
         i = 0
         index = preamble_start+(preamble_length)*self.spb
         while index < len(demod_samples):
@@ -181,9 +184,6 @@ class Receiver:
                 data_bits[i] = 1
                 i+=1
             index+=self.spb
-
-        print data_bits
-
 
         return data_bits # without preamble
 
