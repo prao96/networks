@@ -10,6 +10,7 @@ class Transmitter:
         self.spb = spb
         self.silence = silence
         print 'Transmitter: '
+
     def add_preamble(self, databits):
         '''
         Prepend the array of source bits with silence bits and preamble bits
@@ -18,7 +19,7 @@ class Transmitter:
         The output should be the concatenation of arrays of
             [silence bits], [preamble bits], and [databits]
         '''
-        # fill in your implementation
+        # Concatenating relevant arrays to form databits_with_preamble
         databits_with_preamble = numpy.zeros(self.silence)
         preamble = numpy.array([1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1])
         databits_with_preamble=numpy.concatenate([databits_with_preamble,preamble])
@@ -32,7 +33,7 @@ class Transmitter:
         Sample values for bit '1', '0' should be [one], 0 respectively.
         Output should be an array of samples.
         '''
-        # fill in your implemenation
+        # Filling samples array with 0s and 9s, depending on databits_with_preamble
         samples = numpy.zeros(len(databits_with_preamble)*self.spb)
         counter = 0
         k=0
