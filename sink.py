@@ -23,7 +23,7 @@ class Sink:
             self.image_from_bits(rcd_payload, "rcd-img.png")
             msg = 'Image received'
         elif source == '111':
-            msg = 'Monotone'
+            msg = 'You received a monotone!'
         else:
             msg = 'Sorry, unrecognized sourcetype: ' + source
         print msg
@@ -93,6 +93,7 @@ class Sink:
         header = header_bits[:20]
         # Decodes srctype
         srcString = str(header[1]) + str(header[2]) + str(header[3])
+        srctype = "No source defined"
         if srcString == '000':
             srctype='Text (.txt)'
         elif srcString == '001':
@@ -107,4 +108,4 @@ class Sink:
         print '\tRecd header: ', header
         print '\tLength from header: ', payload_length
         print '\tSource type: ', srctype
-        return srctype, payload_length
+        return srcString, payload_length
