@@ -99,7 +99,7 @@ class Receiver:
         index=0
         for i in range(energy_offset,energy_offset+3*len(samples)):
             demodSubset=demod_samples[i:i+numSamples].copy()
-            dotProducts[index]=numpy.dot(samples,demodSubset)
+            dotProducts[index]=numpy.dot(samples,demodSubset)/numpy.linalg.norm(demodSubset)
             index+=1
 
         print dotProducts 
