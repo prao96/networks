@@ -6,7 +6,7 @@ import graphs
 class BypassChannel:
     def __init__(self, noise, lag, h):
         self.noise = noise
-        self.lag = lag
+        self.lag = 30#lag
         self.h = h
         numpy.random.seed()
 

@@ -37,78 +37,133 @@ class Receiver:
         First, find the first sample index where you detect energy based on the
         moving average method described in the milestone 2 description.
         '''
-        # Define needed constants
-        center=self.spb/2
-        bound=round(self.spb/4,0)
-        k=0
-        sum=0
-        avg=0
-        energy_offset=0
-        flag = 0
-        # Find the sample corresponding to the first reliable "1"
-        while k<len(demod_samples)-self.spb:
-            for x in range(int(center-bound+k),int(center+bound+k)):
-                sum+=demod_samples[x]
-            avg=sum/(2*bound)
-            if avg>(thresh+one)/2:
-                energy_offset=k+center
-                flag = 1
-            else:
-                k+=1
-            if flag==1:
-                break
-            sum=0
-            avg=0
 
-        # Error-checking
-        if k==len(demod_samples)-self.spb:
-            energy_offset=-1
+        center = self.spb/2
+        bound = self.spb/4
+        energy_offset=-1
+        i = 0
+        for i in range(0, len(demod_samples)):
+            centerAverage = numpy.average(demod_samples[i+self.spb/4:i+3*self.spb/4])
+            if centerAverage > (thresh+one)/2:
+                energy_offset=i
+                break
+
         if energy_offset < 0:
             print '*** ERROR: Could not detect any ones (so no preamble). ***'
             print '\tIncrease volume / turn on mic?'
             print '\tOr is there some other synchronization bug? ***'
             sys.exit(1)
 
-        '''
-        Then, starting from the demod_samples[offset], find the sample index where
-        the cross-correlation between the signal samples and the preamble 
-        samples is the highest. 
-        '''
-        # Cross-correlation between signal samples and known preamble
         preamble = numpy.array([1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1])
         preamble_length=len(preamble)
-        samples = numpy.zeros(len(preamble)*self.spb)
+        samples = numpy.zeros(preamble_length*self.spb)
         counter = 0
-        k=0
-        for i in preamble:
-            if i == 0:
-                valToFill = 0
-            elif i == 1:
-                valToFill = 9
-            while counter<self.spb:
-                samples[k] = valToFill
-                k+=1
-                counter+=1
-            counter = 0
 
-        # Find dot-products 
-        numSamples = len(samples)
-        demodSubset = numpy.zeros(numSamples)
+        for k in range(0,preamble_length-1):
+            if preamble[k]==1:
+                valToFill=one
+            else:
+                valToFill=0.0
+            for l in range(0,self.spb):
+                samples[k*self.spb+l]=valToFill
+
         dotProducts=numpy.zeros(3*len(samples))
-        index=0
-        for i in range(energy_offset,energy_offset+3*numSamples):
-            demodSubset=demod_samples[i:i+numSamples].copy()
-            dotProducts[index]=numpy.dot(samples,demodSubset)/numpy.linalg.norm(demodSubset)
-            index+=1 
-        preamble_offset = numpy.argmax(dotProducts) 
-        
-        '''
-        [preamble_offset] is the additional amount of offset starting from [offset],
-        (not a absolute index reference by [0]). 
-        Note that the final return value is [offset + pre_offset]
-        '''
+        for i in range(0,3*len(samples)-1):
+            demodSubset=demod_samples[energy_offset+i:energy_offset+i+len(samples)]
+            subsetNorm = numpy.linalg.norm(demodSubset)
+            #for m in range(0,len(demodSubset)-1):
+            dotProducts[i]=sum(demodSubset[0:len(demodSubset)-1]*samples[0:len(demodSubset)-1])
+            dotProducts[i]=dotProducts[i]/subsetNorm
 
-        return energy_offset + preamble_offset
+        preamble_offset=numpy.argmax(dotProducts)
+
+
+        # # Define needed constants
+        # self.thresh = thresh
+        # center=self.spb/2
+        # bound=round(self.spb/4,0)
+        # k=self.spb/2
+        # sum=0
+        # avg=0
+        # energy_offset=0
+        # flag = 0
+        # # Find the sample corresponding to the first reliable "1"
+        # while k<len(demod_samples)-self.spb:
+        #     for x in range(int(center-bound+k),int(center+bound+k)):
+        #         sum+=demod_samples[x]
+        #     avg=sum/(2*bound)
+        #     if avg>(thresh+one)/2:
+        #         energy_offset=k+center
+        #         flag = 1
+        #     else:
+        #         k+=1
+        #     if flag==1:
+        #         break
+        #     sum=0
+        #     avg=0
+        # # Error-checking
+        # if k==len(demod_samples)-self.spb:
+        #     energy_offset=-1
+        # if energy_offset < 0:
+        #     print '*** ERROR: Could not detect any ones (so no preamble). ***'
+        #     print '\tIncrease volume / turn on mic?'
+        #     print '\tOr is there some other synchronization bug? ***'
+        #     sys.exit(1)
+
+        # '''
+        # Then, starting from the demod_samples[offset], find the sample index where
+        # the cross-correlation between the signal samples and the preamble 
+        # samples is the highest. 
+        # '''
+        # # Cross-correlation between signal samples and known preamble
+        # preamble = numpy.array([1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1])
+        # preamble_length=len(preamble)
+        # samples = numpy.zeros(preamble_length*self.spb)
+        # counter = 0
+        # k=0
+        # for i in preamble:
+        #     if i == 0:
+        #         valToFill = 0
+        #     elif i == 1:
+        #         valToFill = one
+        #     while counter<self.spb:
+        #         samples[k] = valToFill
+        #         k+=1
+        #         counter+=1
+        #     counter = 0
+        # # Find dot-products 
+
+        # print 'these are the good samples'
+        # print samples
+
+        # numSamples = len(samples)
+        # demodSubset = numpy.zeros(numSamples)
+        # dotProducts=numpy.zeros(3*numSamples)
+        # index=0
+        # for i in range(energy_offset,energy_offset+3*numSamples-1):
+        #     demodSubset=demod_samples[i:self.spb]
+        #     subsetNorm=numpy.linalg.norm(demodSubset)
+        #     for k in range(0,self.spb):
+        #         dotProducts[i]=dotProducts[i]+demodSubset[k]*samples[k]
+        #     dotProducts[i]=dotProducts[i]/subsetNorm
+        #     #dotProducts[index]=numpy.dot(samples,demodSubset)/numpy.linalg.norm(demodSubset)
+        #     #index+=1 
+
+
+        # preamble_offset = numpy.argmax(dotProducts) 
+
+        
+        # '''
+        # [preamble_offset] is the additional amount of offset starting from [offset],
+        # (not a absolute index reference by [0]). 
+        # Note that the final return value is [offset + pre_offset]
+        # '''
+
+        print 'Energy offset, followed by preamble offset'
+        print energy_offset
+        print preamble_offset
+
+        return preamble_offset+energy_offset
         
     def demap_and_check(self, demod_samples, preamble_start):
         '''
@@ -122,60 +177,60 @@ class Receiver:
            the preamble. If it is proceed, if not terminate the program. 
         Output is the array of data_bits (bits without preamble)
         '''
+
         preamble = numpy.array([1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1])
         preamble_length=len(preamble)
-        # Find avg of midpoints for each spb samples
-        preambleCheckSamples = numpy.zeros(preamble_length)
-        preambleCheck = numpy.zeros(preamble_length)
-        i = 0
-        while i<preamble_length:
-            preambleCheckSamples[i]=demod_samples[preamble_start+i*self.spb]
-            i+=1
-        index = 0
-        numPreambleZeros = 9
-        zerosIndex=0
-        onesIndex=0
-        i=0
-        preambleZeros=numpy.zeros(numPreambleZeros)
-        preambleOnes=numpy.zeros(15)
-        # Find new [thresh], [one], [zero]
-        while i<preamble_length:
-            if preamble[index]==0:
-                preambleZeros[zerosIndex]=preambleCheckSamples[i]
+        midpoints = numpy.zeros(preamble_length)
+        zeros = numpy.zeros(9)
+        zerosIndex = 0
+        ones = numpy.zeros(15)
+        onesIndex = 0
+
+        for i in range(0, preamble_length-1):
+            midpoints[i] = numpy.average(demod_samples[preamble_start+i*self.spb+self.spb/4: preamble_start+i*self.spb+self.spb*3/4])
+        for k in range(0, preamble_length-1):
+            if preamble[k] == 0:
+                zeros[zerosIndex] = midpoints[k]
                 zerosIndex+=1
-            elif preamble[index]==1:
-                preambleOnes[onesIndex]=preambleCheckSamples[i]
-                onesIndex+=1
-            i+=1
-            index+=1
-        zerosAverage = numpy.average(preambleZeros)
-        onesAverage = numpy.average(preambleOnes)
-        newThresh = (zerosAverage+onesAverage)/2
-
-        # Demap into bits
-        preambleCheckBits = numpy.zeros(preamble_length)
-        i=0
-        while i<preamble_length:
-            if preambleCheckSamples[i]<newThresh:
-                preambleCheckBits[i]=0
             else:
-                preambleCheckBits[i]=1
-            i+=1
+                ones[onesIndex] = midpoints[k]
+                onesIndex+=1
 
-        # Error-checking
-        if preambleCheckBits.all()!=preamble.all():
-            print '*** ERROR: Preamble decoded incorrectly. ***'
-            print preambleCheckBits
-            print preamble
-            sys.exit(1)
 
-        # Find data_bits
-        data_bits = numpy.zeros(int((len(demod_samples)-preamble_start-preamble_length)/self.spb),int)
+        onesAverage = numpy.average(ones)
+        zerosAverage = numpy.average(zeros)
+
+        print onesAverage
+
+        print zerosAverage
+
+        newThresh = (onesAverage+zerosAverage)/2
+
+        print newThresh
+
+        checkedBits = numpy.zeros(preamble_length)
+        for j in range(0, preamble_length-1):
+            if midpoints[j]>newThresh:
+                checkedBits[j] = 1
+            else: 
+                checkedBits[j] = 0
+
+        flag = 0
+
+        for p in range(0, preamble_length-1):
+            if preamble[p] != checkedBits[p]:
+                flag = 1
+            if flag == 1:
+                print '*** ERROR: Preamble decoded incorrectly. ***'
+                print checkedBits
+                print preamble
+                sys.exit(1)
+        data_bits = numpy.zeros(int((len(demod_samples)-preamble_start-(preamble_length))/self.spb),int)
+        index = preamble_start+((preamble_length))*self.spb
         i = 0
-        index = preamble_start+(preamble_length)*self.spb
-        while index < len(demod_samples):
-            start = index-self.spb/2
-            stop = index+self.spb/2
+        while index <= len(demod_samples):
+            start = index+self.spb/4
+            stop = index+3*self.spb/4
             avg = numpy.average(demod_samples[start:stop])
             if avg<newThresh:
                 data_bits[i] = 0
@@ -184,6 +239,95 @@ class Receiver:
                 data_bits[i] = 1
                 i+=1
             index+=self.spb
+
+
+
+
+
+
+
+
+
+                
+
+
+
+
+
+
+        # preamble = numpy.array([1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1])
+        # preamble_length=len(preamble)
+        # # Find avg of midpoints for each spb samples
+        # preambleCheckSamples = numpy.zeros(preamble_length)
+        # preambleCheck = numpy.zeros(preamble_length)
+        # i = 0
+        # while i<preamble_length:
+        #     preambleCheckSamples[i]=demod_samples[preamble_start+i*self.spb+self.spb/2]
+        #     i+=1
+        # index = 0
+        # numPreambleZeros = 9
+        # zerosIndex=0
+        # onesIndex=0
+        # i=0
+        # preambleZeros=numpy.zeros(numPreambleZeros)
+        # preambleOnes=numpy.zeros(15)
+        # # Find new [thresh], [one], [zero]
+        # while i<preamble_length:
+        #     if preamble[index]==0:
+        #         preambleZeros[zerosIndex]=preambleCheckSamples[i]
+        #         zerosIndex+=1
+        #     elif preamble[index]==1:
+        #         preambleOnes[onesIndex]=preambleCheckSamples[i]
+        #         onesIndex+=1
+        #     i+=1
+        #     index+=1
+        # zerosAverage = numpy.average(preambleZeros)
+        # onesAverage = numpy.average(preambleOnes)
+        # newThresh = (zerosAverage+onesAverage)/2
+
+        # # Demap into bits
+        # preambleCheckBits = numpy.zeros(preamble_length)
+        # i=0
+        # while i<preamble_length:
+        #     if preambleCheckSamples[i]<newThresh:
+        #         preambleCheckBits[i]=0
+        #     else:
+        #         preambleCheckBits[i]=1
+        #     i+=1
+
+        # print 'Preamble Check Samples'
+        # print preambleCheckSamples
+        # print demod_samples
+        # print preambleZeros
+        # print preambleOnes
+
+        # # Error-checking
+        # if preambleCheckBits.all()!=preamble.all():
+        #     print '*** ERROR: Preamble decoded incorrectly. ***'
+        #     print preambleCheckBits
+        #     print preamble
+        #     sys.exit(1)
+
+        # # Find data_bits
+        # data_bits = numpy.zeros(int((len(demod_samples)-preamble_start-preamble_length)/self.spb),int)
+        # i = 0
+        # index = preamble_start+(preamble_length)*self.spb
+        # print 'this is the threshold: '
+        # print newThresh
+        # while index < len(demod_samples):
+        #     start = index-self.spb/2
+        #     stop = index+self.spb/2
+        #     avg = numpy.average(demod_samples[start:stop])
+        #     if avg<newThresh:
+        #         data_bits[i] = 0
+        #         i+=1
+        #     else:
+        #         data_bits[i] = 1
+        #         i+=1
+        #     index+=self.spb
+
+        print "THIS IS DATABITS"
+        print data_bits
 
         return data_bits # without preamble
 

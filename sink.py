@@ -105,7 +105,9 @@ class Sink:
         while i<20:
             payload_length+=str(header[i])
             i+=1
+
+        payload_string=int(payload_length,2)
         print '\tRecd header: ', header
-        print '\tLength from header: ', payload_length
+        print '\tLength from header: ', payload_string
         print '\tSource type: ', srctype
         return srcString, payload_length

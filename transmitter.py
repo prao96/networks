@@ -41,7 +41,7 @@ class Transmitter:
             if i == 0:
                 valToFill = 0
             elif i == 1:
-                valToFill = 9
+                valToFill = self.one
             while counter<self.spb:
                 samples[k] = valToFill
                 k+=1

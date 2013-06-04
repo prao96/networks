@@ -140,6 +140,6 @@ if __name__ == '__main__':
     if opt.graph:
                 len_mod = len(mod_samples) - opt.spb*opt.silence 
                 len_demod = len_mod - opt.spb*(len(src_payload) - len(rcd_payload))
-                plot_graphs(mod_samples, samples_rx[barker_start:], demod_samples[barker_start:barker_start + len_demod], opt.spb, src.srctype, opt.silence)
+                plot_graphs(mod_samples, samples_rx[barker_start:], demod_samples[barker_start:barker_start + len_demod], opt.spb, opt.silence)
 
 

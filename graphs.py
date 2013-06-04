@@ -46,14 +46,13 @@ def plot_eye(samples, spb, name):
     p.xlabel('Sample number')
     p.ylabel('Voltage')
     
-def plot_graphs(mod_samples, rx_samples, demod_samples, spb, 
-                srctype, silence):
+def plot_graphs(mod_samples, rx_samples, demod_samples, spb, silence):
 
     scale = spb/4 - 1
    
     #fix hist_samples to only consider the 1/2 of the samples per bit closest to the center
-    header_len = common_srcsink.get_headerlen()
-    plotrange = (len(common_txrx.get_barker()) + header_len)*spb, len(demod_samples)-spb
+    header_len = 24
+    plotrange = (0 + header_len)*spb, len(demod_samples)-spb
     hist = demod_samples[plotrange[0]:plotrange[1]]
     hist_samples = []
     for i in xrange(len(hist)/spb):
