@@ -24,19 +24,23 @@ def demodulate(fc, samplerate, samples):
   '''
   A demodulator that performs quadrature demodulation
   '''
-  cosFunction = numpy.zeros(len(samples))
-  sinFunction = numpy.zeros(len(samples))
+  # cosFunction = numpy.zeros(len(samples))
+  # sinFunction = numpy.zeros(len(samples))
   demodSamples = numpy.zeros(len(samples))
+  complexSamples = numpy.zeros(len(demodSamples), "complex")
 
   for i in range(len(samples)):
-    cosFunction[i] = math.cos(2*math.pi*fc/samplerate*i)
-    sinFunction[i] = math.sin(2*math.pi*fc/samplerate*i)
+    # cosFunction[i] = math.cos(2*math.pi*fc/samplerate*i)
+    # sinFunction[i] = math.sin(2*math.pi*fc/samplerate*i)
+    complexSamples[i] = samples[i]*cmath.exp(2*math.pi*fc/samplerate*cmath.sqrt(-1)*i)
 
-  cosFunction=lpfilter(cosFunction, math.pi*fc/samplerate)
-  sinFunction=lpfilter(sinFunction, math.pi*fc/samplerate)
+  complexSamples=lpfilter(complexSamples, math.pi*fc/samplerate)
+  # cosFunction=lpfilter(cosFunction, math.pi*fc/samplerate)
+  # sinFunction=lpfilter(sinFunction, math.pi*fc/samplerate)
 
   for k in range(len(samples)):
-    demodSamples[k] = abs(cmath.sqrt((sinFunction[k]*samples[k])**2+(cosFunction[k]*samples[k])**2))
+    #demodSamples[k] = abs(cmath.sqrt((sinFunction[k]*samples[k])**2+(cosFunction[k]*samples[k])**2))
+    demodSamples[k] = abs(cmath.sqrt(complexSamples[k].real**2+complexSamples[k].imag**2))
 
   return demodSamples
 
@@ -62,7 +66,7 @@ def lpfilter(samples_in, omega_cut):
   multsamples = numpy.zeros(len(samples_in)+2*L+1, 'complex')
 
   for t in range(L, len(samples_in)+L):
-    multsamples[t] = samples_in[t-L]*cmath.exp(2*omega_cut*cmath.sqrt(-1)*(t-L))
+    multsamples[t] = samples_in[t-L]#*cmath.exp(2*omega_cut*cmath.sqrt(-1)*(t-L))
 
 
   print len(h)
