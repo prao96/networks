@@ -24,14 +24,16 @@ def demodulate(fc, samplerate, samples):
   '''
   A demodulator that performs quadrature demodulation
   '''
-  complexExp = numpy.zeros(len(samples))
+  cosFunction = numpy.zeros(len(samples))
+  sinFunction = numpy.zeros(len(samples))
   demodSamples = numpy.zeros(len(samples))
 
   for i in range(len(samples)):
-    complexExp[i] = math.cos(2*math.pi*fc/samplerate*i)
+    cosFunction[i] = math.cos(2*math.pi*fc/samplerate*i)
+    sinFunction[i] = math.sin(2*math.pi*fc/samplerate*i)
 
   for k in range(len(samples)):
-    demodSamples[k] = complexExp[k]*samples[k]
+    demodSamples[k] = math.sqrt((sinFunction[k]*samples[k])**2+(cosFunction[k]*samples[k])**2)
 
   return demodSamples
 
@@ -44,14 +46,16 @@ def lpfilter(samples_in, omega_cut):
   filteredOutput = numpy.zeros(len(samples_in))
   h = numpy.zeros(2*L+1)
   
-  for i in range(0, len(h)):
+  for i in range(0, len(h)-1):
     h[i] = math.sin(omega_cut*(i-L))/(math.pi*(i-L))
   h[L+1] = omega_cut/math.pi
 
-  for n in range(0, len(filteredOutput)):
+  for y in range(0, len(samples)-1):
+    samples[y] = samples[y]*exp(2*omega_cut*math.sqrt(-1)*y)
+
+  for n in range(0, len(filteredOutput)-1):
     for l in range(-L, L):
       filteredOutput[n] = filteredOutput[n] + h[l+L]*samples[n-(L+l)]
-    filteredOutput[n] = math.abs(filteredOutput[n])
-  # compute the demodulated samples
+
   return filteredOutput
 

@@ -16,27 +16,35 @@ def detect_threshold(demod_samples):
         # complexity in audiocom (for the time being, anyway).
 
 	# initialization
-  print demod_samples
-  center1 = min(demod_samples)
-  center2 = max(demod_samples) 
+  center1 = 0.0
+  center2 = 0.0
+  while center1 == center2:
+    center1 = random.uniform(min(demod_samples), max(demod_samples))
+    center2 = random.uniform(min(demod_samples), max(demod_samples))
+  flag=0
   cluster1 = numpy.zeros(len(demod_samples))
   cluster2 = numpy.zeros(len(demod_samples))
-  m, k = 0, 0
 
-  for i in range(0, len(demod_samples)):
-    sumVals = 0
-    if abs(demod_samples[i] - center1) > abs(demod_samples[i] - center2):
-      cluster2[m] = demod_samples[i]
-      center2 = center2*(1-(1/(m+1))) + m*(1/(m+1))
-      m+=1
-    else: 
-      cluster1[k] = demod_samples[i]
-      center1 = center1*(1-(1/(k+1))) + k*(1/(k+1))
-      k+=1
+  while flag==0:
+    m, k = 0, 0
+    for i in range(0,len(demod_samples)-1):
+      if abs(demod_samples[i]-center1) > abs(demod_samples[i]-center2):
+        cluster2[m] = demod_samples[i]
+        m+=1
+      else:
+        cluster1[k] = demod_samples[i]
+        k+=1
 
-  zero = center1
-  one = center2
-  thresh = (one + zero)/2
+    old1=center1
+    old2=center2
+    center1 = numpy.average(cluster1[0:k-1])
+    center2 = numpy.average(cluster2[0:m-1])
+    if (old1==center1) & (old2==center2):
+      flag=1
+
+  one = old1
+  zero = old2
+  thresh = (zero+one)/2
 
  
   # insert code to associate the higher of the two centers 
