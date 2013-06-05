@@ -27,14 +27,13 @@ def detect_threshold(demod_samples):
 
   while flag==0:
     m, k = 0, 0
-    for i in range(0,len(demod_samples)-1):
+    for i in range(len(demod_samples)):
       if abs(demod_samples[i]-center1) > abs(demod_samples[i]-center2):
         cluster2[m] = demod_samples[i]
         m+=1
       else:
         cluster1[k] = demod_samples[i]
         k+=1
-
     old1=center1
     old2=center2
     center1 = numpy.average(cluster1[0:k-1])
@@ -42,9 +41,9 @@ def detect_threshold(demod_samples):
     if (old1==center1) & (old2==center2):
       flag=1
 
-  one = old1
-  zero = old2
-  thresh = (zero+one)/2
+  one = max(old1,old2)
+  zero = min(old1,old2)
+  thresh = (one+zero)/2
 
  
   # insert code to associate the higher of the two centers 

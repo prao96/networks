@@ -12,8 +12,8 @@ def modulate(fc, samplerate, samples):
   cosFunction = numpy.zeros(len(samples))
   modulatedSamples = numpy.zeros(len(samples))
 
-  for i in range(len(samples)):
-    cosFunction[i] = math.cos(fc*2*math.pi/samplerate*i)
+  for p in range(len(samples)):
+    cosFunction[p] = math.cos(fc*2*math.pi/samplerate*p)
 
   for k in range(len(samples)):
     modulatedSamples[k] = cosFunction[k]*samples[k]
@@ -43,19 +43,65 @@ def lpfilter(samples_in, omega_cut):
   '''
   # set the filter unit sample response
   L = 50
-  filteredOutput = numpy.zeros(len(samples_in))
+  filteredOutput = numpy.zeros(len(samples_in), "complex")
   h = numpy.zeros(2*L+1)
   
-  for i in range(0, len(h)-1):
-    h[i] = math.sin(omega_cut*(i-L))/(math.pi*(i-L))
-  h[L+1] = omega_cut/math.pi
+  for i in range(len(h)):
+    n=i-L
+    h[i] = math.sin(omega_cut*n)/(math.pi*n)
+  h[L+1] = float(omega_cut)/math.pi
 
-  for y in range(0, len(samples)-1):
-    samples[y] = samples[y]*exp(2*omega_cut*math.sqrt(-1)*y)
+  lpsamples = numpy.zeros(len(samples_in), "complex")
 
-  for n in range(0, len(filteredOutput)-1):
-    for l in range(-L, L):
-      filteredOutput[n] = filteredOutput[n] + h[l+L]*samples[n-(L+l)]
+  for y in range(len(lpsamples)):
+    multsamples[y] = samples_in[y]*exp(2*omega_cut*cmath.sqrt(-1)*y)
+
+
+
+  for n in range(len(multsamples)):
+    sum=0
+    for k in range(-L,L):
+      if n-k<0:
+        val=0
+      else:
+        val=multsamples[n-k]
+      sum=sum+h[n]*val
+    filteredOutput[n]=sum
+      
+  print filteredOutput
+
+  # for n in range(-L, 0):
+  #   filteredOutput[n] = numpy.dot(h, lpsamples[n+L:n+2*L])
+
+  # for n in range(0, L):
+  #   filteredOutput[n] = numpy.dot(h, lpsamples[n-L:n+L])
+
+  # print filteredOutput
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  # for n in range(len(filteredOutput)):
+  #   for l in range(-L, L):
+  #     filteredOutput[n] = filteredOutput[n] + h[l+L]*lpsamples[n-(L+l)]
+  #   filteredOutput[n]=abs(filteredOutput[n])
 
   return filteredOutput
 
