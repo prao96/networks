@@ -32,8 +32,11 @@ def demodulate(fc, samplerate, samples):
     cosFunction[i] = math.cos(2*math.pi*fc/samplerate*i)
     sinFunction[i] = math.sin(2*math.pi*fc/samplerate*i)
 
+  cosFunction=lpfilter(cosFunction, math.pi*fc/samplerate)
+  sinFunction=lpfilter(sinFunction, math.pi*fc/samplerate)
+
   for k in range(len(samples)):
-    demodSamples[k] = math.sqrt((sinFunction[k]*samples[k])**2+(cosFunction[k]*samples[k])**2)
+    demodSamples[k] = abs(cmath.sqrt((sinFunction[k]*samples[k])**2+(cosFunction[k]*samples[k])**2))
 
   return demodSamples
 
@@ -41,6 +44,8 @@ def lpfilter(samples_in, omega_cut):
   '''
   A low-pass filter of frequency omega_cut.
   '''
+  print "I'm in the low pass filter!!!!!" 
+
   # set the filter unit sample response
   L = 50
   filteredOutput = numpy.zeros(len(samples_in), "complex")
@@ -48,60 +53,32 @@ def lpfilter(samples_in, omega_cut):
   
   for i in range(len(h)):
     n=i-L
-    h[i] = math.sin(omega_cut*n)/(math.pi*n)
-  h[L+1] = float(omega_cut)/math.pi
+    if n !=0:
+      h[i] = math.sin(omega_cut*n)/(math.pi*n)
+    else:
+      h[i] = float(omega_cut)/math.pi
 
-  lpsamples = numpy.zeros(len(samples_in), "complex")
+  #multsamples = numpy.zeros(len(samples_in)+2*L-1, "complex")
+  multsamples = numpy.zeros(len(samples_in)+2*L+1, 'complex')
 
-  for y in range(len(lpsamples)):
-    multsamples[y] = samples_in[y]*exp(2*omega_cut*cmath.sqrt(-1)*y)
-
-
-
-  for n in range(len(multsamples)):
-    sum=0
-    for k in range(-L,L):
-      if n-k<0:
-        val=0
-      else:
-        val=multsamples[n-k]
-      sum=sum+h[n]*val
-    filteredOutput[n]=sum
-      
-  print filteredOutput
-
-  # for n in range(-L, 0):
-  #   filteredOutput[n] = numpy.dot(h, lpsamples[n+L:n+2*L])
-
-  # for n in range(0, L):
-  #   filteredOutput[n] = numpy.dot(h, lpsamples[n-L:n+L])
-
-  # print filteredOutput
+  for t in range(L, len(samples_in)+L):
+    multsamples[t] = samples_in[t-L]*cmath.exp(2*omega_cut*cmath.sqrt(-1)*(t-L))
 
 
+  print len(h)
+  print len(multsamples[148510:148510+len(h)])
+  for n in range(len(filteredOutput)):
+    filteredOutput[n] = numpy.dot(h, multsamples[n:n+len(h)])
 
 
+  # multsamples = numpy.zeros(len(samples_in)+2*L, "complex")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  # for y in range(L,len(multsamples)-L):
+  #   multsamples[y] = samples_in[y-L]*cmath.exp(2*omega_cut*cmath.sqrt(-1)*(y-L))
 
   # for n in range(len(filteredOutput)):
-  #   for l in range(-L, L):
-  #     filteredOutput[n] = filteredOutput[n] + h[l+L]*lpsamples[n-(L+l)]
-  #   filteredOutput[n]=abs(filteredOutput[n])
+  #   filteredOutput[n]=numpy.dot(multsamples[n:n+2*L+1],h)
+
 
   return filteredOutput
 
